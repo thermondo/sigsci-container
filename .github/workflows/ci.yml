@@ -1,0 +1,28 @@
+name: Publish
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Build containers
+        run: make
+        env:
+          PYTHON_VERSION: "3.11"
+
+      - uses: thermondo/gce-docker-push-action@a51e08b0f3c379d26d65e327ce0271aa21ecd50c
+        with:
+          username: ${{ github.repository_owner }}
+          creds: ${{ secrets.GITHUB_TOKEN }}
+          registry: ghcr.io
+          image: ghcr.io/thermondo/sigsci
