@@ -26,6 +26,8 @@ jobs:
     runs-on: ubuntu-22.04
     needs: lint
     steps:
+      - uses: actions/checkout@v3
+
       - name: Build general-purpose container
         run: make general
 
@@ -38,6 +40,8 @@ jobs:
           - "3.10"
           - "3.11"
     steps:
+      - uses: actions/checkout@v3
+
       - name: Build Python container
         run: make python
         env:
