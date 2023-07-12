@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+  schedule:
+    - cron: "13 4 * * 0"  # every Sunday at 4:13 UTC   https://crontab.guru/#13_4_*_*_0
 
 permissions:
   contents: read
