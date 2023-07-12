@@ -4,6 +4,10 @@ Run the [Signal Sciences WAF](https://www.signalsciences.com/) ("sigsci") agent 
 [reverse proxy mode](https://docs.fastly.com/signalsciences/install-guides/reverse-proxy/) alongside your app in the
 same container.
 
+```shell
+docker pull ghcr.io/thermondo/sigsci
+```
+
 ### Why?
 
 Signal Sciences offers [several integration options](https://docs.fastly.com/signalsciences/install-guides/) including
@@ -62,7 +66,7 @@ when Heroku tries to set the `PORT` variable at runtime.
 Example Python Dockerfile:
 
 ```dockerfile
-FROM thermondo-sigsci:python-3.11
+FROM ghcr.io/thermondo/sigsci:python-3.11
 ARG DEBIAN_FRONTEND=noninteractive
 
 # Configure All The Things here as usual
