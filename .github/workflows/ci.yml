@@ -31,6 +31,14 @@ jobs:
       - name: Build general-purpose container
         run: make general
 
+      - name: Publish
+        uses: thermondo/gce-docker-push-action@a51e08b0f3c379d26d65e327ce0271aa21ecd50c
+        with:
+          username: ${{ github.repository_owner }}
+          creds: ${{ secrets.GITHUB_TOKEN }}
+          registry: ghcr.io
+          image: ghcr.io/thermondo/sigsci
+
   build-python:
     runs-on: ubuntu-22.04
     needs: lint
@@ -47,13 +55,8 @@ jobs:
         env:
           PYTHON_VERSION: ${{ matrix.version }}
 
-  publish:
-    needs:
-      - build-general
-      - build-python
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: thermondo/gce-docker-push-action@a51e08b0f3c379d26d65e327ce0271aa21ecd50c
+      - name: Publish
+        uses: thermondo/gce-docker-push-action@a51e08b0f3c379d26d65e327ce0271aa21ecd50c
         with:
           username: ${{ github.repository_owner }}
           creds: ${{ secrets.GITHUB_TOKEN }}
