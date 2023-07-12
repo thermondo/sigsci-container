@@ -10,16 +10,45 @@ permissions:
   packages: write
 
 jobs:
-  publish:
-    runs-on: ubuntu-20.04
+  lint:
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
 
-      - name: Build containers
-        run: make
-        env:
-          PYTHON_VERSION: "3.11"
+      - name: Shellcheck
+        run: "shellcheck *.sh"
 
+      - uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: Dockerfile
+
+  build-general:
+    runs-on: ubuntu-22.04
+    needs: lint
+    steps:
+      - name: Build general-purpose container
+        run: make general
+
+  build-python:
+    runs-on: ubuntu-22.04
+    needs: lint
+    strategy:
+      matrix:
+        version:
+          - "3.10"
+          - "3.11"
+    steps:
+      - name: Build Python container
+        run: make python
+        env:
+          PYTHON_VERSION: ${{ matrix.version }}
+
+  publish:
+    needs:
+      - build-general
+      - build-python
+    runs-on: ubuntu-22.04
+    steps:
       - uses: thermondo/gce-docker-push-action@a51e08b0f3c379d26d65e327ce0271aa21ecd50c
         with:
           username: ${{ github.repository_owner }}

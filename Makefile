@@ -1,14 +1,16 @@
-all: basic python
+PYTHON_VERSION?=3.11
+
+all: lint general python
 .PHONY: all
 
-basic:
+general:
 	docker build \
 		--pull \
 		--tag "localhost/thermondo-sigsci" \
 		--tag "ghcr.io/thermondo/sigsci" \
 		--build-arg "BASE_IMAGE=ubuntu:22.04" \
 		.
-.PHONY: basic
+.PHONY: general
 
 python:
 	docker build \
@@ -18,3 +20,8 @@ python:
 		--build-arg "BASE_IMAGE=python:${PYTHON_VERSION}-slim" \
 		.
 .PHONY: python
+
+lint:
+	hadolint Dockerfile
+	shellcheck *.sh
+.PHONY: lint
