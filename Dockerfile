@@ -4,6 +4,7 @@ ARG BASE_IMAGE
 # we're allowing the CI process to tag our image explicitly
 # hadolint ignore=DL3006
 FROM docker.io/library/${BASE_IMAGE}
+LABEL org.opencontainers.image.source="https://github.com/thermondo/sigsci-container"
 ARG DEBIAN_FRONTEND=noninteractive
 SHELL [ "/bin/bash", "-Eeuo", "pipefail", "-c" ]
 
