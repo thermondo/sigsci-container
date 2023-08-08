@@ -8,7 +8,7 @@ general:
 		--pull \
 		--tag "localhost/thermondo-sigsci" \
 		--tag "ghcr.io/thermondo/sigsci" \
-		--build-arg "BASE_IMAGE=ubuntu:22.04" \
+		--build-arg "BASE_IMAGE=debian:bookworm-slim" \
 		.
 .PHONY: general
 
