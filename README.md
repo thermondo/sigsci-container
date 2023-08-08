@@ -57,10 +57,14 @@ when Heroku tries to set the `PORT` variable at runtime.
 
 **startup settings**
 
-* `SIGSCI_WAIT_ENDPOINT`: (optional) the endpoint that indicates your service is running and healthy. you could set
-    this to something like `ht` or `version`, or any endpoint that returns a `200 OK` response when the service is
-    healthy. the default value is empty, so the sigsci agent will just ping `/` if you don't configure it.
-* `SIGSCI_WAIT_TIMEOUT`: (optional) defaults to 60 seconds. if your app's "wait endpoint" doesn't respond with `200 OK`
+The container will only start the sigsci agent after your app is ready. It knows your app is ready when it
+responds with a non-error response on a configured HTTP endpoint.
+
+* `SIGSCI_WAIT_ENDPOINT`: the endpoint that indicates your service is running and healthy. you could set this
+    to something like `ht` or `version`, or any endpoint that returns a success response when the service is
+    healthy. the default value is an empty string, so the sigsci agent will just ping `http://127.0.0.1:${APP_PORT}/`
+    if you don't configure it at all.
+* `SIGSCI_WAIT_TIMEOUT`: (optional) defaults to 60 seconds. if your app's "wait endpoint" doesn't respond
     within this time, the container will stop with an error code.
 
 Example Python Dockerfile:
