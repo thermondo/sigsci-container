@@ -37,7 +37,7 @@ upstreams = \"http://127.0.0.1:${APP_PORT}\"
 
 UPSTREAM_URL="http://127.0.0.1:${APP_PORT}/${SIGSCI_WAIT_ENDPOINT:-}"
 echo "waiting for ${UPSTREAM_URL} to respond..."
-wait-for "${UPSTREAM_URL}" --timeout "${SIGSCI_WAIT_TIMEOUT:-60}" --header "${SIGSCI_WAIT_HEADER}"
+wait-for "${UPSTREAM_URL}" --timeout "${SIGSCI_WAIT_TIMEOUT:-60}" --header "${SIGSCI_WAIT_HEADER:-}"
 
 echo "starting sigsci-agent..."
 /usr/sbin/sigsci-agent --config "${CONFIG_FILE}" &
