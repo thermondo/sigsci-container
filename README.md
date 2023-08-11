@@ -66,6 +66,8 @@ responds with a non-error response on a configured HTTP endpoint.
     if you don't configure it at all.
 * `SIGSCI_WAIT_TIMEOUT`: (optional) defaults to 60 seconds. if your app's "wait endpoint" doesn't respond
     within this time, the container will stop with an error code.
+* `SIGSCI_WAIT_HEADER`: (optional) include a custom header line in the wait HTTP request. useful if, for
+    example, your application uses `X-Forwarded-Proto: https` to enforce HTTPS connections.
 
 Example Python Dockerfile:
 
@@ -77,6 +79,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 ENV APP_PORT=2000
 ENV SIGSCI_WAIT_ENDPOINT=ht
+ENV SIGSCI_WAIT_HEADER="X-Forwarded-Proto: https"
 CMD [ "poetry", "run", "python", "runserver.py", "0:${APP_PORT}" ]
 ```
 
