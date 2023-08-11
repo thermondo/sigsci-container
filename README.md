@@ -28,7 +28,7 @@ configure the sigsci agent to filter all incoming HTTP requests through the WAF 
 This container comes in two variants:
 
 * `sigsci`: A general-purpose base image that should work for any tech stack (Python, JVM, etc.). It is based
-    on the [official Ubuntu image](https://hub.docker.com/_/ubuntu).
+    on the [official Debian bookworm-slim image](https://hub.docker.com/_/debian).
 * `sigsci:python-X.XX`: An image that is more ideal for a Python tech stack, based on the
     [official Python image](https://hub.docker.com/_/python)
 
