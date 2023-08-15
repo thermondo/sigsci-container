@@ -64,8 +64,11 @@ responds with a non-error response on a configured HTTP endpoint.
     to something like `ht` or `version`, or any endpoint that returns a success response when the service is
     healthy. the default value is an empty string, so the sigsci agent will just ping `http://127.0.0.1:${APP_PORT}/`
     if you don't configure it at all.
-* `SIGSCI_WAIT_TIMEOUT`: (optional) defaults to 60 seconds. if your app's "wait endpoint" doesn't respond
+* `SIGSCI_WAIT_TIMEOUT`: (optional) defaults to `60` seconds. if your app's "wait endpoint" doesn't respond
     within this time, the container will stop with an error code.
+* `SIGSCI_WAIT_STATUS`: (optional) defaults to `200` (OK). this is the HTTP response status code you expect
+    from your wait endpoint when your application is up and running. if your application redirects HTTP
+    requests to HTTPS, for example, you may want to set this to `308` (Permanent Redirect).
 
 Example Python Dockerfile:
 
@@ -77,6 +80,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 ENV APP_PORT=2000
 ENV SIGSCI_WAIT_ENDPOINT=ht
+ENV SIGSCI_WAIT_STATUS=308
 CMD [ "poetry", "run", "python", "runserver.py", "0:${APP_PORT}" ]
 ```
 

@@ -12,7 +12,7 @@ SHELL [ "/bin/bash", "-Eeuo", "pipefail", "-c" ]
 # hadolint ignore=DL3008
 RUN \
 apt-get update; \
-apt-get install --yes --no-install-recommends apt-transport-https wget gnupg ca-certificates; \
+apt-get install --yes --no-install-recommends apt-transport-https wget gnupg ca-certificates curl; \
 wget -qO - https://apt.signalsciences.net/release/gpgkey | gpg --dearmor -o /usr/share/keyrings/sigsci.gpg; \
 echo "deb [signed-by=/usr/share/keyrings/sigsci.gpg] https://apt.signalsciences.net/release/ubuntu/ jammy main" > /etc/apt/sources.list.d/sigsci-release.list; \
 apt-get update; \
@@ -21,6 +21,5 @@ apt-get clean; \
 rm -rf /var/lib/apt/lists/*;
 
 COPY entrypoint.sh /entrypoint.sh
-COPY wait-for/wait-for /usr/local/bin/
 
 ENTRYPOINT [ "/entrypoint.sh" ]
