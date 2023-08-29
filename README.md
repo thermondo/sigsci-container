@@ -77,7 +77,6 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 ENV APP_PORT=2000
 ENV SIGSCI_WAIT_ENDPOINT=ht
-ENV SIGSCI_WAIT_STATUS=308
 CMD [ "poetry", "run", "python", "runserver.py", "0:${APP_PORT}" ]
 ```
 
