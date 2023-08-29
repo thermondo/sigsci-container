@@ -12,8 +12,8 @@ SHELL [ "/bin/bash", "-Eeuo", "pipefail", "-c" ]
 # hadolint ignore=DL3008
 RUN \
 apt-get update; \
-apt-get install --yes --no-install-recommends apt-transport-https wget gnupg ca-certificates curl; \
-wget -qO - https://apt.signalsciences.net/release/gpgkey | gpg --dearmor -o /usr/share/keyrings/sigsci.gpg; \
+apt-get install --yes --no-install-recommends apt-transport-https curl gnupg ca-certificates; \
+curl --silent --fail --show-error --location https://apt.signalsciences.net/release/gpgkey | gpg --dearmor -o /usr/share/keyrings/sigsci.gpg; \
 echo "deb [signed-by=/usr/share/keyrings/sigsci.gpg] https://apt.signalsciences.net/release/ubuntu/ jammy main" > /etc/apt/sources.list.d/sigsci-release.list; \
 apt-get update; \
 apt-get install --yes --no-install-recommends sigsci-agent; \
