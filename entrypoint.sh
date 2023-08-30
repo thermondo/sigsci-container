@@ -39,7 +39,7 @@ UPSTREAM_URL="http://127.0.0.1:${APP_PORT}/${SIGSCI_WAIT_ENDPOINT:-}"
 echo "waiting for ${UPSTREAM_URL} to respond..."
 
 send_upstream_request() {
-    curl --silent --fail --output /dev/null \
+    curl --silent --output /dev/null \
         --max-time 2 \
         "${UPSTREAM_URL}"
 }
