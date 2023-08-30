@@ -37,7 +37,27 @@ upstreams = \"http://127.0.0.1:${APP_PORT}\"
 
 UPSTREAM_URL="http://127.0.0.1:${APP_PORT}/${SIGSCI_WAIT_ENDPOINT:-}"
 echo "waiting for ${UPSTREAM_URL} to respond..."
-wait-for "${UPSTREAM_URL}" --timeout "${SIGSCI_WAIT_TIMEOUT:-60}"
+
+send_upstream_request() {
+    curl --silent --fail --output /dev/null \
+        --max-time 2 \
+        "${UPSTREAM_URL}"
+}
+
+wait_for_response() {
+    local timeout="${SIGSCI_WAIT_TIMEOUT:-60}"
+    local timeout_end=$(($(date +%s) + timeout))
+
+    while ! send_upstream_request; do
+        if [ "${timeout}" -ne 0 ] && [ "$(date +%s)" -ge "${timeout_end}" ]; then
+            echo "${UPSTREAM_URL} failed to respond after ${timeout} seconds."
+            exit 1
+        fi
+        sleep 1
+    done
+}
+
+wait_for_response
 
 echo "starting sigsci-agent..."
 /usr/sbin/sigsci-agent --config "${CONFIG_FILE}" &
