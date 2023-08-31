@@ -6,6 +6,20 @@ if [ "${#}" -eq 0 ]; then
     exit 1
 fi
 
+if tty --silent; then
+    # the user is likely trying to run an interactive shell in the container. example commands that
+    # might get us here:
+    #
+    # * docker compose run my-service /bin/bash
+    # * docker run --rm -it my-image /bin/bash
+    # * heroku run --app my-app -- /bin/bash
+    #
+    # we don't want to wait for the upstream app to start, etc. just execute the command (ex:
+    # `/bin/bash` above) and exit.
+    "${@}"
+    exit ${?}
+fi
+
 APP_PORT="${APP_PORT:-2000}"
 
 if [ "${APP_PORT}" -eq "${PORT}" ]; then
