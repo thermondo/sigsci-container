@@ -6,16 +6,18 @@ if [ "${#}" -eq 0 ]; then
     exit 1
 fi
 
-if tty --silent; then
-    # the user is likely trying to run an interactive shell in the container. example commands that
-    # might get us here:
+if tty --silent || [ "${SIGSCI_DISABLE+is_set}" == "is_set" ]; then
+    # either:
     #
-    # * docker compose run my-service /bin/bash
-    # * docker run --rm -it my-image /bin/bash
-    # * heroku run --app my-app -- /bin/bash
+    # * the user is trying to disable the firewall during local development (for example)
+    # * the user is attaching a TTY (interactive shell) to the container. example commands that
+    #   might do that:
+    #     * docker compose run my-service /bin/bash
+    #     * docker run --rm -it my-image /bin/bash
+    #     * heroku run --app my-app -- /bin/bash
     #
-    # we don't want to wait for the upstream app to start, etc. just execute the command (ex:
-    # `/bin/bash` above) and exit.
+    # in either case, we don't want to wait for the upstream app to start, initialize the sigsci
+    # agent, etc. just execute the command (ex: `/bin/bash`) and exit.
     "${@}"
     exit ${?}
 fi

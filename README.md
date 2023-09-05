@@ -66,6 +66,8 @@ running when it responds with a non-error response on a configured HTTP endpoint
     configure it at all.
 * `SIGSCI_WAIT_TIMEOUT`: (optional) defaults to `60` seconds. if your app's "wait endpoint" doesn't
     respond within this time, the container will stop with an error code.
+* `SIGSCI_DISABLE`: (optional) useful for local development. set this environment variable to
+    anything, and it will just run your app without the firewall.
 
 Example Python Dockerfile:
 
