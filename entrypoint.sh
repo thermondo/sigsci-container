@@ -6,18 +6,15 @@ if [ "${#}" -eq 0 ]; then
     exit 1
 fi
 
-if tty --silent || [ "${SIGSCI_DISABLE+is_set}" == "is_set" ]; then
-    # either:
-    #
-    # * the user is trying to disable the firewall during local development (for example)
-    # * the user is attaching a TTY (interactive shell) to the container. example commands that
-    #   might do that:
-    #     * docker compose run my-service /bin/bash
-    #     * docker run --rm -it my-image /bin/bash
-    #     * heroku run --app my-app -- /bin/bash
-    #
-    # in either case, we don't want to wait for the upstream app to start, initialize the sigsci
-    # agent, etc. just execute the command (ex: `/bin/bash`) and exit.
+SIGSCI_STATUS="${SIGSCI_STATUS:-enabled}"
+
+if [ "${SIGSCI_STATUS}" == "disabled" ]; then
+    if [ "${PORT:-}" != "" ]; then
+        # we still expect our container to listen on ${PORT}, but since we're not running the
+        # sigsci agent, we need to tell the upstream app to run on that port instead.
+        export APP_PORT="${PORT}"
+    fi
+
     "${@}"
     exit ${?}
 fi
