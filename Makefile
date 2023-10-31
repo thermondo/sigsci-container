@@ -1,4 +1,4 @@
-PYTHON_VERSION?=3.11
+PYTHON_VERSION?=3.12
 
 all: lint general python
 .PHONY: all
