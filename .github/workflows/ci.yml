@@ -65,3 +65,26 @@ jobs:
           creds: ${{ secrets.GITHUB_TOKEN }}
           registry: ghcr.io
           image: ghcr.io/thermondo/sigsci
+
+  build-java:
+    runs-on: ubuntu-22.04
+    needs: lint
+    strategy:
+      matrix:
+        version:
+          - "21"
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Build Java container
+        run: make java
+        env:
+          JAVA_VERSION: ${{ matrix.version }}
+
+      - name: Publish
+        uses: thermondo/gce-docker-push-action@a51e08b0f3c379d26d65e327ce0271aa21ecd50c
+        with:
+          username: ${{ github.repository_owner }}
+          creds: ${{ secrets.GITHUB_TOKEN }}
+          registry: ghcr.io
+          image: ghcr.io/thermondo/sigsci
