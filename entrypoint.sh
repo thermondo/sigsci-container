@@ -1,13 +1,34 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2317  # shellcheck thinks our trap has unreachable code
+#
+# usage: ./entrypoint.sh <the command to execute>
+#
+# this script performs the following steps:
+#
+# 1. run the given command as a background job
+# 2. wait for an HTTP response at `SIGSCI_WAIT_ENDPOINT`
+# 3. run the sigsci agent, forwarding requests from `PORT` to `APP_PORT`
+#
+# however if the `SIGSCI_STATUS` environment variable is set to `disabled`
+# then this script will just execute step 1 only.
+#
+# SIGINT, SIGTERM, and SIGHUP signals that this process receives will be
+# forwarded to the child process.
+#
+
 set -Eeuo pipefail
 
+log() {
+    echo "SIGSCI: ${*}"
+}
+
 if [ "${#}" -eq 0 ]; then
-    echo "FATAL: no command specified."
+    log "FATAL: no command specified."
     exit 1
 fi
 
+# check if sigsci is disabled. if so, just execute the command and be done with it!
 SIGSCI_STATUS="${SIGSCI_STATUS:-enabled}"
-
 if [ "${SIGSCI_STATUS}" == "disabled" ]; then
     if [ "${PORT:-}" != "" ]; then
         # we still expect our container to listen on ${PORT}, but since we're not running the
@@ -15,15 +36,18 @@ if [ "${SIGSCI_STATUS}" == "disabled" ]; then
         export APP_PORT="${PORT}"
     fi
 
-    "${@}"
+    # `exec` replaces this shell with the given command. this makes it so we don't need to
+    # worry about forwarding signals to the child process, because the child process will
+    # just get those signals directly.
+    exec "${@}"
     exit ${?}
 fi
 
 APP_PORT="${APP_PORT:-2000}"
 
 if [ "${APP_PORT}" -eq "${PORT}" ]; then
-    echo "FATAL: PORT env variable is set to ${PORT}, which is reserved for the upstream application."
-    echo "Consider changing APP_PORT env variable to something that won't conflict."
+    log "FATAL: PORT env variable is set to ${PORT}, which is reserved for the upstream application."
+    log "Consider changing APP_PORT env variable to something that won't conflict."
     exit 1
 fi
 
@@ -46,10 +70,26 @@ listener = \"http://0.0.0.0:${PORT}\"
 upstreams = \"http://127.0.0.1:${APP_PORT}\"
 " > "${CONFIG_FILE}"
 
+# start child process in the background, save its PID so we can forward
+# signals to it
 "${@}" &
+CHILD_PID=${!}
 
+# trap various signals and forward them to the child process so it can
+# gracefully shutdown if needed
+on_signal_received() {
+    local signal_name="${1}"
+    kill -s "${signal_name}" "${CHILD_PID}"
+    wait "${CHILD_PID}" || true
+}
+trap 'on_signal_received SIGTERM' SIGTERM
+trap 'on_signal_received SIGINT' SIGINT
+trap 'on_signal_received SIGHUP' SIGHUP
+
+# now that the child process is running, let's spam it with HTTP requests
+# until we get a response
 UPSTREAM_URL="http://127.0.0.1:${APP_PORT}/${SIGSCI_WAIT_ENDPOINT:-}"
-echo "waiting for ${UPSTREAM_URL} to respond..."
+log "waiting for ${UPSTREAM_URL} to respond..."
 
 send_upstream_request() {
     curl --silent --output /dev/null \
@@ -63,7 +103,7 @@ wait_for_response() {
 
     while ! send_upstream_request; do
         if [ "${timeout}" -ne 0 ] && [ "$(date +%s)" -ge "${timeout_end}" ]; then
-            echo "${UPSTREAM_URL} failed to respond after ${timeout} seconds."
+            log "${UPSTREAM_URL} failed to respond after ${timeout} seconds."
             exit 1
         fi
         sleep 1
@@ -72,8 +112,11 @@ wait_for_response() {
 
 wait_for_response
 
-echo "starting sigsci-agent..."
+# child process is running and responding to HTTP requests. almost done!
+log "starting sigsci-agent..."
 /usr/sbin/sigsci-agent --config "${CONFIG_FILE}" &
 
+# wait for ANY background job to exit; either the child process or the sigsci agent.
+# if just one of them exits, we allow the whole container to exit.
 wait -n
 exit ${?}
