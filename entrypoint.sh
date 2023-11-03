@@ -12,8 +12,8 @@
 # however if the `SIGSCI_STATUS` environment variable is set to `disabled`
 # then this script will just execute step 1 only.
 #
-# SIGINT, SIGTERM, and SIGHUP signals that this process receives will be
-# forwarded to the child process.
+# SIGINT, SIGTERM signals that this process receives will be forwarded to
+# the child process.
 #
 
 set -Eeuo pipefail
@@ -84,7 +84,6 @@ on_signal_received() {
 }
 trap 'on_signal_received SIGTERM' SIGTERM
 trap 'on_signal_received SIGINT' SIGINT
-trap 'on_signal_received SIGHUP' SIGHUP
 
 # now that the child process is running, let's spam it with HTTP requests
 # until we get a response
