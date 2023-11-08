@@ -25,14 +25,16 @@ This container image is especially developed for Heroku, though it can be used i
 This is meant to be used as a base image for your own containers. When you base your container on this image, you can
 configure the sigsci agent to filter all incoming HTTP requests through the WAF before they get to your application.
 
-This container comes in two variants:
+This container image comes in a few variants:
 
 * `sigsci`: A general-purpose base image that should work for any tech stack (Python, JVM, etc.). It is based
     on the [official Debian bookworm-slim image](https://hub.docker.com/_/debian).
 * `sigsci:python-X.XX`: An image that is more ideal for a Python tech stack, based on the
     [official Python image](https://hub.docker.com/_/python)
+* `sigsci:jre-XX`: An image that is more ideal for a Java tech stack, based on the
+    [official eclipse-temurin image](https://hub.docker.com/_/eclipse-temurin/)
 
-It should be trivial to create other similar "flavors" of the image, including a JVM variant.
+It should be trivial to create other similar "flavors" of the image as needed.
 
 ### Configuration
 
@@ -58,7 +60,7 @@ when Heroku tries to set the `PORT` variable at runtime.
 **startup settings**
 
 The container will only start the sigsci agent after your app is running. It knows your app is
-running when it responds with a non-error response on a configured HTTP endpoint.
+running when it responds to an HTTP request on a configured HTTP endpoint.
 
 * `SIGSCI_WAIT_ENDPOINT`: (optional) the HTTP endpoint that indicates your service is running. you
     could set this to something like `ht` or `version`, for example. the default value is an empty
