@@ -27,6 +27,24 @@ if [ "${#}" -eq 0 ]; then
     exit 1
 fi
 
+CHILD_PIDS=()
+
+kill_child_processes() {
+    local signal_name="${1}"
+    for pid in "${CHILD_PIDS[@]}"; do
+        log "Sending ${signal_name} to child PID ${pid}..."
+        kill -s "${signal_name}" "${pid}" || true
+    done
+}
+
+# trap various signals and forward them to the child process so it can
+# gracefully shutdown if needed
+on_signal_received() {
+    kill_child_processes "${1}"
+}
+trap 'on_signal_received SIGTERM' SIGTERM
+trap 'on_signal_received SIGINT' SIGINT
+
 # check if sigsci is disabled. if so, just execute the command and be done with it!
 SIGSCI_STATUS="${SIGSCI_STATUS:-enabled}"
 if [ "${SIGSCI_STATUS}" == "disabled" ]; then
@@ -73,18 +91,7 @@ upstreams = \"http://127.0.0.1:${APP_PORT}\"
 # start child process in the background, save its PID so we can forward
 # signals to it
 "${@}" &
-CHILD_PID=${!}
-
-# trap various signals and forward them to the child process so it can
-# gracefully shutdown if needed
-on_signal_received() {
-    local signal_name="${1}"
-    log "Sending ${signal_name} to child PID ${CHILD_PID}..."
-    kill -s "${signal_name}" "${CHILD_PID}"
-    wait "${CHILD_PID}" || true
-}
-trap 'on_signal_received SIGTERM' SIGTERM
-trap 'on_signal_received SIGINT' SIGINT
+CHILD_PIDS+=(${!})
 
 # now that the child process is running, let's spam it with HTTP requests
 # until we get a response
@@ -115,8 +122,11 @@ wait_for_response
 # child process is running and responding to HTTP requests. almost done!
 log "starting sigsci-agent..."
 /usr/sbin/sigsci-agent --config "${CONFIG_FILE}" &
+CHILD_PIDS+=(${!})
 
 # wait for ANY background job to exit; either the child process or the sigsci agent.
 # if just one of them exits, we allow the whole container to exit.
 wait -n
-exit ${?}
+EXIT_CODE=${?}
+kill_child_processes SIGTERM
+exit "${EXIT_CODE}"
