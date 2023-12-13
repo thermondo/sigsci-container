@@ -79,6 +79,7 @@ CHILD_PID=${!}
 # gracefully shutdown if needed
 on_signal_received() {
     local signal_name="${1}"
+    log "Sending ${signal_name} to child PID ${CHILD_PID}..."
     kill -s "${signal_name}" "${CHILD_PID}"
     wait "${CHILD_PID}" || true
 }
