@@ -37,3 +37,11 @@ then forwards the signal to ALL of:
 
 If this signal causes ANY of these child processes to exit, that will cause bash to exit, which will
 cause `tini` to exit, and that is ultimately what stops the container.
+
+## Why not use docker's `--init` flag?
+
+`docker run --init` does essentially the same thing we are doing with `tini`. Docker even _uses
+`tini` internally._
+
+The reason we set up `tini` manually is because we aren't always in control of how the container is
+started, and we want it to work regardless of whether you use `--init` or not.

@@ -33,4 +33,9 @@ COPY entrypoint.sh /entrypoint.sh
 # to ALL processes.
 ENV TINI_KILL_PROCESS_GROUP=1
 
-ENTRYPOINT [ "/usr/bin/tini", "-vvv", "--", "/entrypoint.sh" ]
+# tell tini to reap all child processes, even if the host started the container
+# with the --init flag (causing our tini instance to no longer be PID 1).
+ENV TINI_SUBREAPER=1
+ENV TINI_VERBOSITY=3
+
+ENTRYPOINT [ "/usr/bin/tini", "--", "/entrypoint.sh" ]
