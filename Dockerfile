@@ -29,6 +29,8 @@ rm -rf /var/lib/apt/lists/*;
 COPY entrypoint.sh /entrypoint.sh
 
 # tell tini to forward signals to ALL processes, not just the immediate child
+# don't be fooled by the env variable name; this makes tini forward ALL signals
+# to ALL processes.
 ENV TINI_KILL_PROCESS_GROUP=1
 
 ENTRYPOINT [ "/usr/bin/tini", "-vvv", "--", "/entrypoint.sh" ]
