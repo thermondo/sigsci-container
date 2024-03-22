@@ -70,21 +70,12 @@ listener = \"http://0.0.0.0:${PORT}\"
 upstreams = \"http://127.0.0.1:${APP_PORT}\"
 " > "${CONFIG_FILE}"
 
-# start child process in the background, save its PID so we can forward
-# signals to it
+# start child process in the background. we rely on tini to forward signals to it. tini needs to be
+# configured to kill the entire process group, which should be done in the dockerfile before this
+# script runs.
+#
+# https://github.com/krallin/tini?tab=readme-ov-file#process-group-killing
 "${@}" &
-CHILD_PID=${!}
-
-# trap various signals and forward them to the child process so it can
-# gracefully shutdown if needed
-on_signal_received() {
-    local signal_name="${1}"
-    log "Sending ${signal_name} to child PID ${CHILD_PID}..."
-    kill -s "${signal_name}" "${CHILD_PID}"
-    wait "${CHILD_PID}" || true
-}
-trap 'on_signal_received SIGTERM' SIGTERM
-trap 'on_signal_received SIGINT' SIGINT
 
 # now that the child process is running, let's spam it with HTTP requests
 # until we get a response
@@ -117,6 +108,6 @@ log "starting sigsci-agent..."
 /usr/sbin/sigsci-agent --config "${CONFIG_FILE}" &
 
 # wait for ANY background job to exit; either the child process or the sigsci agent.
-# if just one of them exits, we allow the whole container to exit.
+# once this script exits, any remaining subprocesses should die too.
 wait -n
 exit ${?}

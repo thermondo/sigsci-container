@@ -38,3 +38,7 @@ lint:
 	hadolint Dockerfile
 	shellcheck *.sh
 .PHONY: lint
+
+shell: general
+	docker run --rm -it --env SIGSCI_STATUS=disabled localhost/thermondo-sigsci /bin/bash
+.PHONY: shell
