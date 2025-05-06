@@ -17,7 +17,8 @@ ARG APT_SOURCE
 # hadolint ignore=DL3008
 RUN \
 apt-get update; \
-apt-get install --yes --no-install-recommends apt-transport-https curl gnupg ca-certificates; \
+apt-get install --yes --no-install-recommends \
+    apt-transport-https curl gnupg ca-certificates tini; \
 curl --silent --fail --show-error --location https://apt.signalsciences.net/release/gpgkey | gpg --dearmor -o /usr/share/keyrings/sigsci.gpg; \
 echo "deb [signed-by=/usr/share/keyrings/sigsci.gpg] ${APT_SOURCE}" > /etc/apt/sources.list.d/sigsci-release.list; \
 apt-get update; \
@@ -27,4 +28,14 @@ rm -rf /var/lib/apt/lists/*;
 
 COPY entrypoint.sh /entrypoint.sh
 
-ENTRYPOINT [ "/entrypoint.sh" ]
+# tell tini to forward signals to ALL processes, not just the immediate child
+# don't be fooled by the env variable name; this makes tini forward ALL signals
+# to ALL processes.
+ENV TINI_KILL_PROCESS_GROUP=1
+
+# tell tini to reap all child processes, even if the host started the container
+# with the --init flag (causing our tini instance to no longer be PID 1).
+ENV TINI_SUBREAPER=1
+ENV TINI_VERBOSITY=3
+
+ENTRYPOINT [ "/usr/bin/tini", "--", "/entrypoint.sh" ]

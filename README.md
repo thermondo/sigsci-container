@@ -91,3 +91,5 @@ CMD [ "poetry", "run", "python", "runserver.py", "0:${APP_PORT}" ]
     the sigsci agent after your app is up and running. This means you should not use `ENTRYPOINT` in your own
     Dockerfile unless you know what you're doing. If you use [CMD](https://docs.docker.com/engine/reference/builder/#cmd)
     instead, the base image's entrypoint script will execute that command for you.
+* This is a multi-service container. See [process management docs](doc/process-management.md) to
+    learn what our strategy is for doing this well.
