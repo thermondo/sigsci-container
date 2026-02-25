@@ -13,22 +13,22 @@ permissions:
 
 jobs:
   lint:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Shellcheck
-        run: "shellcheck *.sh"
+        run: "shellcheck -- *.sh"
 
-      - uses: hadolint/hadolint-action@v3.1.0
+      - uses: hadolint/hadolint-action@2332a7b74a6de0dda2e2221d575162eba76ba5e5 # v3.3.0
         with:
           dockerfile: Dockerfile
 
   build-general:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     needs: lint
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Build general-purpose container
         run: make general
@@ -42,7 +42,7 @@ jobs:
           image: ghcr.io/thermondo/sigsci
 
   build-python:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     needs: lint
     strategy:
       matrix:
@@ -52,7 +52,7 @@ jobs:
           - "3.12"
           - "3.13"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Build Python container
         run: make python
@@ -68,14 +68,14 @@ jobs:
           image: ghcr.io/thermondo/sigsci
 
   build-java:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     needs: lint
     strategy:
       matrix:
         version:
           - "21"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Build Java container
         run: make java
