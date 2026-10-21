@@ -22,6 +22,12 @@ curl --silent --fail --show-error --location https://apt.signalsciences.net/rele
 echo "deb [signed-by=/usr/share/keyrings/sigsci.gpg] ${APT_SOURCE}" > /etc/apt/sources.list.d/sigsci-release.list; \
 apt-get update; \
 apt-get install --yes --no-install-recommends sigsci-agent; \
+if [ -n "${JAVA_HOME:-}" ]; then \
+  # Temurin ships its own cacerts snapshot; derive it from the OS store instead so
+  # CA distrusts in ca-certificates (e.g. eMudhra, Oct 2026) also apply to Java.
+  apt-get install --yes --no-install-recommends p11-kit; \
+  trust extract --overwrite --format=java-cacerts --filter=ca-anchors --purpose=server-auth "${JAVA_HOME}/lib/security/cacerts"; \
+fi; \
 apt-get clean; \
 rm -rf /var/lib/apt/lists/*;
 
