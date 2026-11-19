@@ -77,6 +77,7 @@ CHILD_PID=${!}
 
 # trap various signals and forward them to the child process so it can
 # gracefully shutdown if needed
+# shellcheck disable=SC2329 # called via trap below
 on_signal_received() {
     local signal_name="${1}"
     log "Sending ${signal_name} to child PID ${CHILD_PID}..."
